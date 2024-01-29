@@ -1,15 +1,20 @@
-# Terraform code 
+# Project 20: GitOps CICD with Github Actions and Kubernetes
 
-## Maintain vpc & eks with terraform for vprofile project
+This project creates a pipeline that provisions an infrastructure in EKS using IaC with terraform
 
-## Tools required
-Terraform version 1.6.3
+## Architecture
+![Architecture]()
 
-### Steps
-* terraform init
-* terraform fmt -check
-* terraform validate
-* terraform plan -out planfile
-* terraform apply -auto-approve -input=false -parallelism=1 planfile
-####
-#####
+## Prepare Github Repositories
+
+## GitHub secrets
+
+## Staging workflow
+
+## Main workflow
+
+## App workflow
+
+## Deployment to EKS
+
+## Clean up
