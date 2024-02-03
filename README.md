@@ -252,14 +252,202 @@ jobs:
 
 ```
 
+Commit and push to github, in staging branch, then the pipeline will be triggered, which will run but skip terraform apply
+!(Stage apply)[]
+
+Merge the staging branch to main branch, this will cause the pipeline again to run but this time, will apply the changes and setup the infrastructure on AWS eks
+
+!(workflow apply)[]
+!(Eks)[]
+!(created EC2)[]
+
 ## App workflow
 
 The next workflow will use the infrastructure created from the previous job, then deploy the application with best practices.
 
  - Create an organization in sonarcloud
 
- Open the browser and navigate to <www.sonar.io>
+ Open the browser and navigate to www.sonarcloud.io, click the "+" at the top right corner and create a new organization -> create one manually
+ 
+ ```
+ name: rhenaOrg
+ key: rhenaOrg -> Create
+
+ ```
+Click analyze new project
+```
+Organization: rhenaOrg
+display name: rhenaOrg
+Project key: rhenaOrg -> Next
+The new code for this project will be based on: Previous version=true
+ -> Create project
+```
+
+Choose analysis method: With Github actions:
+
+Copy the sonar token, and create a secret in Github repo rhena-actions
+```
+name: SONAR_TOKEN, secret: <COPIED TOKEN>
+name: SONAR_ORGANIZATION, secret: rhenaOrg
+name: SONAR_PROJECT_KEY, secret: rhenaOrg
+name: SONAR_URL, secret: https://www.sonarcloud.io
+```
+
+Create quality gate in sonarcloud -> Administration -> Organization's settings -> Create:
+```
+name: rhenaQG
+add condition: 
+  where: on overall code = true
+  Quality gate fails when Bugs > 50
+  select project: rhenaOrg
+```
+
+Back to Administration -> Quality gate -> rhenaQG
 
 ## Deployment to EKS
 
+### Install helm charts
+In terminal, run the code(for ubuntu users, other users can check their operating system installation)
+
+```bash
+sudo apt install helm
+```
+
+### Configure helm
+Change to the directory where the project is rhena-actions, then run
+
+```bash
+helm create rhenacharts
+```
+
+A new directory(rhenacharts) will be created, next
+
+```bash
+mkdir helm
+mv rhenacharts helm/
+rm -rf helm/rhenacharts/templates/*
+cp kubernetes/vpro-app/* helm/rhenacharts/templates/
+```
+
+### Deploy code
+
+Back to VSCode, commit and push the changes. In github actions, run the workflow.
+!(sucessful deployment)[]
+
+### Modify domain name
+In the file helm/rhenacharts/templates/vproingress.yaml, modify the domain name to your own after creating a hosted zone in Route53
+
+```yml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vpro-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: rhena.ndzenyuyjones.link
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: my-app
+            port:
+              number: 8080
+```
+
+modify the line ```- host: rhena.ndzenyuyjones.link``` to contain your domain name, will put a CNAME record in the hosted zone.
+
+On the AWS console, we need to search and copy the url of the load balancer created for this project by the previous stack, copy the url and create a hosted zone with a cname record
+```
+Type: CNAME
+Name: rhena
+value: <LOAD BALANCER URL>
+```
+
+Wait about 5-10mins and search the link of our project on a browser rhena.ndzenyuyjones.link, the landing page should appear
+!(vprofile welcome page)[]
+
 ## Clean up
+
+### Remove ingress controller
+
+First we need to make sure there is no existing kubeconfig file in our local machine by running
+```
+rm -rf /.kube/config
+aws eks update-kubeconfig --region us-east-2 --name rhena-eks
+```
+Now go to the repository, where ever it was cloned and run
+```
+kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.3/deploy/static/provider/aws/deploy.yaml
+
+```
+Now delete the helm list, you can first run ``` helm list``` and copy the name of the list to be uninstalled
+
+```
+helm uninstall rhena-stack
+```
+
+Move to terraform folder
+```
+cd terraform/
+```
+Then initialize terraform
+
+Change the content of terraform.tf file to match the following
+```tf
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.25.0"
+    }
+
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5.1"
+    }
+
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0.4"
+    }
+
+    cloudinit = {
+      source  = "hashicorp/cloudinit"
+      version = "~> 2.3.2"
+    }
+
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.23.0"
+    }
+  }
+
+  backend "s3" {
+    bucket = "rhenaactions"
+    key    = "terraform.tfstate"
+    region = "us-east-2"
+  }
+
+  required_version = "~> 1.5.1"
+}
+
+
+```
+
+Then we initialise the local machine to have the same state as the created cloud infrastructure.
+
+```tf
+terraform init -backend-config="<S3 BUCKET NAME>"
+
+```
+
+Now we run destroy command, when prompted type yes
+
+```tf
+terraform destroy
+```
