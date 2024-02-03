@@ -4,7 +4,7 @@ This project creates a pipeline that provisions an infrastructure in EKS using I
 
 ## Architecture
 
-![Architecture]()
+![Architecture](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/project20-gitops.jpg)
 
 ## Prepare Github Repositories
 
@@ -253,11 +253,11 @@ jobs:
 ```
 
 Commit and push to github, in staging branch, then the pipeline will be triggered, which will run but skip terraform apply
-!(Stage apply)[]
+![Stage apply](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/completed%20workflow%20test.png)
+![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/completed%20workflow%20test2.png)
 
 Merge the staging branch to main branch, this will cause the pipeline again to run but this time, will apply the changes and setup the infrastructure on AWS eks
 
-!(workflow apply)[]
 !(Eks)[]
 !(created EC2)[]
 
