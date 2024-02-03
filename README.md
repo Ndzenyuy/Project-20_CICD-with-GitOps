@@ -258,6 +258,8 @@ Commit and push to github, in staging branch, then the pipeline will be triggere
 
 
 ![Stage apply](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/completed%20workflow%20test.png)
+
+
 ![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/completed%20workflow%20test2.png)
 
 
@@ -265,6 +267,8 @@ Commit and push to github, in staging branch, then the pipeline will be triggere
 Merge the staging branch to main branch, this will cause the pipeline again to run but this time, will apply the changes and setup the infrastructure on AWS eks
 
 ![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/eks%20cluster.png)
+
+
 ![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/ec2%20created%20instances.png)
 
 ## App workflow
