@@ -446,7 +446,7 @@ terraform init -backend-config="<S3 BUCKET NAME>"
 
 ```
 
-Now we run destroy command, when prompted type yes
+Now we run destroy command, when prompted type "yes"
 
 ```tf
 terraform destroy
