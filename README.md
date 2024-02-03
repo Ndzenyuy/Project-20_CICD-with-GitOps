@@ -109,6 +109,8 @@ Name: BUCKET_TF_STATE, secret: rhenaactions
 On to AWS console, Elastic Container Registry -> Create repository -> name: rhenaapp -> create repository. 
 Copy the repository URI(XXXXXXXXX.dkr.ecr.us-east-2.amazonaws.com/rhenaapp)
 
+![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/created%20repository.png)
+
 Back to github secrets (rhena-actions), Create another secret
 ```
 Name: REGISTRY, secret: XXXXXXXXX.dkr.ecr.us-east-2.amazonaws.com
@@ -253,13 +255,17 @@ jobs:
 ```
 
 Commit and push to github, in staging branch, then the pipeline will be triggered, which will run but skip terraform apply
+
+
 ![Stage apply](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/completed%20workflow%20test.png)
 ![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/completed%20workflow%20test2.png)
 
+
+
 Merge the staging branch to main branch, this will cause the pipeline again to run but this time, will apply the changes and setup the infrastructure on AWS eks
 
-!(Eks)[]
-!(created EC2)[]
+![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/eks%20cluster.png)
+![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/ec2%20created%20instances.png)
 
 ## App workflow
 
@@ -283,6 +289,9 @@ The new code for this project will be based on: Previous version=true
  -> Create project
 ```
 
+![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/creating%20organization.png)
+
+
 Choose analysis method: With Github actions:
 
 Copy the sonar token, and create a secret in Github repo rhena-actions
@@ -301,8 +310,11 @@ add condition:
   Quality gate fails when Bugs > 50
   select project: rhenaOrg
 ```
+![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/create%20quality%20gate.png)
+
 
 Back to Administration -> Quality gate -> rhenaQG
+
 
 ## Deployment to EKS
 
@@ -332,7 +344,8 @@ cp kubernetes/vpro-app/* helm/rhenacharts/templates/
 ### Deploy code
 
 Back to VSCode, commit and push the changes. In github actions, run the workflow.
-!(sucessful deployment)[]
+
+![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/successful%20build%20whole%20project.png)
 
 ### Modify domain name
 In the file helm/rhenacharts/templates/vproingress.yaml, modify the domain name to your own after creating a hosted zone in Route53
@@ -369,7 +382,20 @@ value: <LOAD BALANCER URL>
 ```
 
 Wait about 5-10mins and search the link of our project on a browser rhena.ndzenyuyjones.link, the landing page should appear
-!(vprofile welcome page)[]
+
+
+![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/access%20via%20alb%20dns.png)
+
+Quality gate reports:
+
+![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/sonar%20scan%20report.png)
+
+Login with 
+```
+username: admin_vp
+passwrd: admin_vp
+```
+![](https://github.com/Ndzenyuy/Project-20_CICD-with-GitOps/blob/main/images-project-20/login%20successful.png)
 
 ## Clean up
 
